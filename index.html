@@ -274,8 +274,7 @@ footer{border-top:1px solid var(--card-brd);padding:44px 0;color:var(--txt-dim);
   <div class="hero-content">
     <span class="eyebrow reveal"><span class="dot"></span> <span class="lbl" id="heroLbl">Boutique de design de experiência</span></span>
     <h1 class="reveal lettering" data-delay="1" id="heroLettering">
-      <span class="phrase on">Toda jornada tem<br><span class="l2 grad-text">um marco zero.</span></span>
-      <span class="phrase">Começa com <br><span class="l2 grad-text">as perguntas certas.</span></span>
+      <span class="phrase on">Toda jornada começa<br><span class="l2 grad-text">com a pergunta certa.</span></span>
       <span class="phrase">Ideias viram<br><span class="l2 grad-text">protótipos navegáveis.</span></span>
       <span class="phrase">Protótipos viram<br><span class="l2 grad-text">experiências reais.</span></span>
     </h1>
@@ -499,11 +498,11 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 const heroVideo=document.getElementById('heroVideo');
 const phrases=document.querySelectorAll('#heroLettering .phrase');
 const heroLbl=document.getElementById('heroLbl');
+// 3 cenas do vídeo (5s cada em 15s): cortes em t=5 e t=10 do espaço normalizado
 const phases=[
-  {start:0.0, i:0, lbl:'Boutique de design de experiência'},
-  {start:3.6, i:1, lbl:'Design Thinking · Discovery'},
-  {start:7.6, i:2, lbl:'UX · UI · Prototipação'},
-  {start:11.6,i:3, lbl:'Do marco zero ao sucesso'}
+  {start:0,  i:0, lbl:'Design Thinking · Discovery'},
+  {start:5,  i:1, lbl:'UX · UI · Prototipação'},
+  {start:10, i:2, lbl:'Do marco zero ao sucesso'}
 ];
 const LOOP=15;let curPhase=-1;
 function applyPhase(k){
