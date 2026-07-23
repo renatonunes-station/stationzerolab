@@ -1,0 +1,7 @@
+Coloque aqui o arquivo do vídeo do hero com o nome exato:
+
+    hero-journey.mp4
+
+Baixe o MP4 no chat do Cowork (card "Station Zero Lab — Hero Journey")
+e salve neste diretório (assets/). O site já prioriza este arquivo local.
+Se o arquivo não existir, a página usa um fundo em gradiente animado como fallback.

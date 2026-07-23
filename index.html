@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Station Zero Lab — Design de Experiência</title>
+<meta name="description" content="Boutique de design de experiência. Do posicionamento de marca à IA agêntica, criamos ecossistemas de experiência que geram saldo positivo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --ink:#0a0a12;
+  --purple:#340B45;
+  --indigo:#0F0E37;
+  --magenta:#C81E8A;
+  --violet:#8B2FE6;
+  --blue:#3A5BFF;
+  --cyan:#2FB3FF;
+  --grad: linear-gradient(115deg,#B14BFF 0%,#6D5BFF 45%,#2FA8FF 100%);
+  --grad-deep: linear-gradient(160deg,#340B45 0%,#1a1250 48%,#0F0E37 100%);
+  --grad-magenta: linear-gradient(120deg,#C81E8A 0%,#8B2FE6 60%,#3A5BFF 100%);
+  --txt:#f5f4fb;
+  --txt-dim:#a9a6c9;
+  --card:rgba(255,255,255,.045);
+  --card-brd:rgba(255,255,255,.09);
+  --maxw:1200px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background:var(--ink);color:var(--txt);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  line-height:1.5;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.display{font-family:'Sora','Inter',sans-serif;letter-spacing:-.02em;line-height:1.03}
+::selection{background:var(--violet);color:#fff}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.grad-text-m{background:var(--grad-magenta);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ============ NAV ============ */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:background .4s,backdrop-filter .4s,border-color .4s;border-bottom:1px solid transparent}
+nav.scrolled{background:rgba(10,10,18,.72);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);border-bottom:1px solid var(--card-brd)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.logo{display:flex;align-items:center;gap:11px;font-family:'Sora';font-weight:700;font-size:16px;letter-spacing:-.01em}
+.logo .mark{width:26px;height:26px;border-radius:8px;background:var(--grad);display:grid;place-items:center;box-shadow:0 4px 18px rgba(139,47,230,.5)}
+.logo .mark span{width:9px;height:9px;border-radius:50%;background:#fff}
+.nav-links{display:flex;gap:32px;align-items:center;font-size:14.5px;color:var(--txt-dim)}
+.nav-links a{transition:color .25s}.nav-links a:hover{color:#fff}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:100px;font-weight:600;font-size:14.5px;transition:transform .3s var(--ease),box-shadow .3s,filter .3s;cursor:pointer;border:none}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 6px 26px rgba(109,91,255,.45)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(109,91,255,.6);filter:brightness(1.08)}
+.btn-ghost{border:1px solid var(--card-brd);color:var(--txt);background:var(--card)}
+.btn-ghost:hover{background:rgba(255,255,255,.09);transform:translateY(-2px)}
+.nav-toggle{display:none;background:none;border:none;color:#fff;cursor:pointer}
+@media(max-width:860px){.nav-links{display:none}}
+
+/* ============ HERO ============ */
+.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden;padding:120px 24px 80px}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+#heroVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;opacity:0;transition:opacity 1.4s ease}
+#heroVideo.ready{opacity:.62}
+.hero-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(7,7,15,.55) 0%,rgba(7,7,15,.25) 40%,rgba(7,7,15,.75) 100%)}
+.hero-glow{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(60% 50% at 50% 42%,rgba(139,47,230,.28),transparent 70%),
+             radial-gradient(50% 40% at 78% 75%,rgba(58,91,255,.22),transparent 70%),
+             radial-gradient(40% 40% at 18% 30%,rgba(200,30,138,.18),transparent 70%)}
+.hero-content{position:relative;z-index:3;max-width:900px}
+.lettering{min-height:2.1em;display:flex;align-items:center;justify-content:center}
+.lettering .phrase{position:absolute;opacity:0;transform:translateY(22px);transition:opacity .7s var(--ease),transform .7s var(--ease);width:100%;left:0}
+.lettering .phrase.on{opacity:1;transform:none;position:relative}
+.eyebrow .lbl{transition:opacity .5s}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;padding:7px 16px;border-radius:100px;background:var(--card);border:1px solid var(--card-brd);font-size:13px;font-weight:500;color:var(--txt-dim);margin-bottom:30px;backdrop-filter:blur(10px)}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--grad);box-shadow:0 0 12px var(--violet)}
+.hero h1{font-size:clamp(40px,7.5vw,88px);font-weight:800;margin-bottom:26px}
+.hero h1 .l2{display:block}
+.hero p.sub{font-size:clamp(17px,2.4vw,22px);color:var(--txt-dim);max-width:620px;margin:0 auto 40px;font-weight:400;line-height:1.55}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.scroll-cue{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--txt-dim);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.mouse{width:24px;height:38px;border:2px solid var(--card-brd);border-radius:14px;position:relative}
+.mouse::after{content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);width:4px;height:8px;border-radius:2px;background:var(--txt-dim);animation:scrollmouse 1.8s infinite}
+@keyframes scrollmouse{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}60%{opacity:1;transform:translate(-50%,10px)}100%{opacity:0;transform:translate(-50%,12px)}}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+[data-delay="1"]{transition-delay:.09s}[data-delay="2"]{transition-delay:.18s}[data-delay="3"]{transition-delay:.27s}
+[data-delay="4"]{transition-delay:.36s}[data-delay="5"]{transition-delay:.45s}[data-delay="6"]{transition-delay:.54s}[data-delay="7"]{transition-delay:.63s}
+
+/* ============ SECTION BASICS ============ */
+section{position:relative}
+.sect{padding:120px 0}
+.sect-head{max-width:760px;margin:0 auto 64px;text-align:center}
+.tag{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px;display:block}
+.sect-head h2{font-size:clamp(30px,5vw,52px);font-weight:800;margin-bottom:20px}
+.sect-head p{font-size:clamp(16px,2vw,19px);color:var(--txt-dim);line-height:1.6}
+
+/* ============ MANIFESTO ============ */
+.manifesto{padding:140px 0;text-align:center}
+.manifesto .brands{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:44px}
+.brand-chip{padding:10px 22px;border-radius:100px;border:1px solid var(--card-brd);background:var(--card);font-size:14px;font-weight:600;color:var(--txt-dim);backdrop-filter:blur(10px)}
+.manifesto h2{font-size:clamp(28px,4.6vw,50px);font-weight:800;max-width:920px;margin:0 auto 28px}
+.manifesto p{font-size:clamp(16px,2.1vw,20px);color:var(--txt-dim);max-width:660px;margin:0 auto;line-height:1.65}
+
+/* ============ SHOWCASE (scroll-driven laptop + phone) ============ */
+.showcase{position:relative;height:320vh}
+.showcase-pin{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.showcase-bg{position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 45%,rgba(109,91,255,.16),transparent 70%);z-index:0}
+.showcase-copy{position:absolute;top:9vh;left:0;right:0;text-align:center;z-index:5;padding:0 24px;transition:opacity .5s}
+.showcase-copy .tag{color:transparent}
+.showcase-copy h2{font-size:clamp(26px,4.4vw,46px);font-weight:800;margin-bottom:12px}
+.showcase-copy p{color:var(--txt-dim);max-width:520px;margin:0 auto;font-size:16px}
+.stage{position:relative;z-index:2;width:min(88vw,900px);display:flex;align-items:flex-end;justify-content:center;transform-style:preserve-3d;perspective:1900px}
+
+/* laptop */
+.laptop{position:relative;width:100%;max-width:820px;transform-style:preserve-3d}
+.laptop .screen{position:relative;width:100%;aspect-ratio:16/10.2;background:#05060f;border-radius:16px 16px 6px 6px;padding:10px;border:1px solid rgba(255,255,255,.1);
+  transform-origin:bottom center;box-shadow:0 40px 90px rgba(0,0,0,.6);will-change:transform}
+.laptop .bezel{width:100%;height:100%;border-radius:8px;overflow:hidden;position:relative;background:#0b0c1e}
+.laptop .cam{position:absolute;top:5px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#1a1b30;z-index:9}
+.laptop .base{position:relative;width:112%;left:-6%;height:15px;background:linear-gradient(180deg,#c7c9d6,#8b8ea3);border-radius:0 0 12px 12px;transform-origin:top center;box-shadow:0 22px 40px rgba(0,0,0,.5)}
+.laptop .base::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:14%;height:6px;background:#6f7285;border-radius:0 0 8px 8px}
+
+/* phone */
+.phone{position:absolute;right:-2%;bottom:-4%;width:min(26%,210px);aspect-ratio:9/19;background:#05060f;border-radius:30px;padding:6px;border:1px solid rgba(255,255,255,.14);box-shadow:0 30px 70px rgba(0,0,0,.6);z-index:4;will-change:transform,opacity}
+.phone .pscreen{width:100%;height:100%;border-radius:24px;overflow:hidden;position:relative;background:linear-gradient(170deg,#1a0f38,#0c0b22)}
+.phone .notch{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:34%;height:15px;background:#05060f;border-radius:0 0 10px 10px;z-index:9}
+@media(max-width:640px){.phone{width:38%;right:-4%}}
+
+/* ---- coded BMP internet banking UI (inside laptop bezel) ---- */
+.bank{position:absolute;inset:0;display:flex;font-size:9px;color:#eee;background:linear-gradient(150deg,#1b0f3e 0%,#12103a 55%,#0c0b22 100%)}
+.bank .side{width:20%;padding:14px 10px;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:6px}
+.bank .side .b-logo{display:flex;align-items:center;gap:6px;font-weight:800;font-size:11px;margin-bottom:10px}
+.bank .side .b-logo i{width:16px;height:16px;border-radius:5px;background:var(--grad);display:block}
+.bank .nav-i{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;color:#b9b6d8}
+.bank .nav-i.act{background:rgba(139,47,230,.22);color:#fff}
+.bank .nav-i b{width:11px;height:11px;border-radius:3px;background:currentColor;opacity:.55;display:block}
+.bank .main{flex:1;padding:14px 16px;overflow:hidden}
+.bank .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.bank .top h4{font-size:12px;font-weight:700}
+.bank .top .u{width:20px;height:20px;border-radius:50%;background:var(--grad-magenta)}
+.bank .cards{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:9px;margin-bottom:12px}
+.bank .kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px}
+.bank .kpi.hero-c{background:var(--grad-deep);border:1px solid rgba(139,47,230,.4)}
+.bank .kpi span{color:#a9a6c9;font-size:8px;display:block;margin-bottom:5px}
+.bank .kpi b{font-size:14px;font-weight:800}
+.bank .kpi.hero-c b{font-size:17px}
+.bank .row2{display:grid;grid-template-columns:1.6fr 1fr;gap:9px}
+.bank .chartbox{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:11px}
+.bank .chartbox .cap{display:flex;justify-content:space-between;font-size:8px;color:#a9a6c9;margin-bottom:8px}
+.bank svg.spark{width:100%;height:52px;display:block}
+.bank .qa{display:flex;flex-direction:column;gap:6px}
+.bank .qa .q{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:8px;display:flex;align-items:center;gap:7px;font-size:9px;font-weight:600}
+.bank .qa .q i{width:16px;height:16px;border-radius:6px;background:var(--grad);display:grid;place-items:center}
+.bank .tx{margin-top:10px}
+.bank .tx .t{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid rgba(255,255,255,.06);font-size:8.5px}
+.bank .tx .t .amt.pos{color:#4be3a0}.bank .tx .t .amt.neg{color:#ff87b6}
+
+/* ---- coded BMP mobile UI (inside phone) ---- */
+.mbank{position:absolute;inset:0;padding:22px 12px 12px;display:flex;flex-direction:column;gap:9px;font-size:8px;color:#eee}
+.mbank .mtop{display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#c9c6e6}
+.mbank .mbal{background:var(--grad-deep);border:1px solid rgba(139,47,230,.4);border-radius:13px;padding:12px}
+.mbank .mbal span{font-size:7px;color:#c9c6e6}
+.mbank .mbal b{font-size:16px;font-weight:800;display:block;margin-top:3px}
+.mbank .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;font-size:7px;color:#c9c6e6}
+.mbank .mgrid .mi i{width:26px;height:26px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:grid;place-items:center;margin:0 auto 4px}
+.mbank .mgrid .mi i b{width:11px;height:11px;border-radius:4px;background:var(--grad);display:block}
+.mbank .mcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:9px}
+.mbank .mcard .cap{font-size:8px;font-weight:700;margin-bottom:7px}
+.mbank .mt{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid rgba(255,255,255,.06)}
+.mbank .mt .amt.pos{color:#4be3a0}.mbank .mt .amt.neg{color:#ff87b6}
+
+/* ============ SERVICES ============ */
+.grid-svc{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:980px){.grid-svc{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.grid-svc{grid-template-columns:1fr}}
+.svc{position:relative;background:var(--card);border:1px solid var(--card-brd);border-radius:18px;padding:26px 22px;overflow:hidden;transition:transform .5s var(--ease),border-color .5s,background .5s}
+.svc::before{content:'';position:absolute;inset:0;background:var(--grad-deep);opacity:0;transition:opacity .5s;z-index:0}
+.svc:hover{transform:translateY(-6px);border-color:rgba(139,47,230,.5)}
+.svc:hover::before{opacity:.5}
+.svc>*{position:relative;z-index:1}
+.svc .ico{width:44px;height:44px;border-radius:13px;background:var(--grad);display:grid;place-items:center;margin-bottom:18px;box-shadow:0 8px 24px rgba(109,91,255,.4)}
+.svc .ico svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8}
+.svc h3{font-size:18px;font-weight:700;margin-bottom:9px}
+.svc h3 small{display:block;font-size:11px;font-weight:600;letter-spacing:.12em;color:var(--violet);margin-bottom:4px}
+.svc p{font-size:13.5px;color:var(--txt-dim);line-height:1.55}
+
+/* ============ PLATFORMS ============ */
+.plat{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:12px}
+@media(max-width:860px){.plat{grid-template-columns:1fr}}
+.plat-card{position:relative;border-radius:22px;padding:38px 34px;overflow:hidden;border:1px solid var(--card-brd);background:var(--grad-deep)}
+.plat-card::after{content:'';position:absolute;top:-40%;right:-20%;width:60%;height:120%;background:radial-gradient(circle,rgba(139,47,230,.35),transparent 65%);z-index:0}
+.plat-card>*{position:relative;z-index:1}
+.plat-card .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:6px 13px;border-radius:100px;background:rgba(255,255,255,.09);border:1px solid var(--card-brd);margin-bottom:18px}
+.plat-card h3{font-size:26px;font-weight:800;margin-bottom:14px}
+.plat-card p{font-size:14.5px;color:var(--txt-dim);line-height:1.6;margin-bottom:18px}
+.plat-card .feats{display:flex;flex-wrap:wrap;gap:8px}
+.plat-card .feats span{font-size:11.5px;padding:5px 11px;border-radius:100px;background:rgba(255,255,255,.06);border:1px solid var(--card-brd);color:#cfcce8}
+
+/* ============ METHODS ============ */
+.meth{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:860px){.meth{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.meth{grid-template-columns:1fr}}
+.meth-i{border-left:2px solid;border-image:var(--grad) 1;padding:6px 0 6px 18px}
+.meth-i h4{font-size:16px;font-weight:700;margin-bottom:8px}
+.meth-i p{font-size:13px;color:var(--txt-dim);line-height:1.55}
+
+/* ============ CASE ============ */
+.case{position:relative;border-radius:26px;overflow:hidden;border:1px solid var(--card-brd);background:var(--grad-deep);padding:52px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+@media(max-width:860px){.case{grid-template-columns:1fr;padding:34px}}
+.case::before{content:'';position:absolute;inset:0;background:radial-gradient(50% 80% at 85% 20%,rgba(200,30,138,.25),transparent 60%);z-index:0}
+.case>*{position:relative;z-index:1}
+.case .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:6px 13px;border-radius:100px;background:rgba(255,255,255,.09);border:1px solid var(--card-brd);margin-bottom:18px}
+.case h3{font-size:clamp(24px,3.4vw,34px);font-weight:800;margin-bottom:16px}
+.case p{font-size:15px;color:var(--txt-dim);line-height:1.65;margin-bottom:14px}
+.case .stats{display:flex;gap:26px;margin-top:22px}
+.case .stats b{font-size:30px;font-weight:800;display:block}
+.case .stats span{font-size:12px;color:var(--txt-dim)}
+.case .visual{aspect-ratio:4/3;border-radius:16px;background:linear-gradient(150deg,#1b0f3e,#0c0b22);border:1px solid rgba(255,255,255,.1);position:relative;overflow:hidden;display:grid;place-items:center}
+.case .visual .fake{width:82%;height:70%;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);padding:14px;display:flex;flex-direction:column;gap:8px}
+.case .visual .fake .r{height:9px;border-radius:5px;background:rgba(255,255,255,.09)}
+.case .visual .fake .r.g{background:var(--grad);width:55%}
+.case .visual .fake .cc{display:flex;gap:8px;margin-top:auto}
+.case .visual .fake .cc div{flex:1;height:38px;border-radius:8px;background:var(--grad-deep);border:1px solid rgba(139,47,230,.4)}
+
+/* ============ CTA / CONTACT ============ */
+.cta{text-align:center;padding:150px 0 130px;position:relative;overflow:hidden}
+.cta::before{content:'';position:absolute;inset:0;background:radial-gradient(50% 70% at 50% 50%,rgba(109,91,255,.22),transparent 70%);z-index:0}
+.cta>*{position:relative;z-index:1}
+.cta h2{font-size:clamp(32px,6vw,68px);font-weight:800;margin-bottom:24px;max-width:820px;margin-inline:auto}
+.cta p{font-size:18px;color:var(--txt-dim);margin-bottom:38px}
+.cta .mail{font-size:clamp(18px,3vw,26px);font-weight:700}
+
+/* ============ FOOTER ============ */
+footer{border-top:1px solid var(--card-brd);padding:44px 0;color:var(--txt-dim);font-size:13.5px}
+.foot-in{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px}
+.foot-links{display:flex;gap:22px}
+.foot-links a:hover{color:#fff}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-in">
+    <a href="#top" class="logo"><span class="mark"><span></span></span> Station Zero Lab</a>
+    <div class="nav-links">
+      <a href="#fazemos">O que fazemos</a>
+      <a href="#plataformas">Plataformas</a>
+      <a href="#metodologias">Metodologias</a>
+      <a href="#case">Cases</a>
+    </div>
+    <a href="#contato" class="btn btn-primary">Fale conosco</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <canvas id="heroCanvas"></canvas>
+  <!-- 1ª source = link temporário do Magnific (expira ~2 dias, só para preview imediato).
+       Baixe o MP4 no card do chat, salve como assets/hero-journey.mp4 e ele passa a ser usado de forma permanente. -->
+  <video id="heroVideo" autoplay muted loop playsinline preload="auto">
+    <source src="assets/hero-journey.mp4" type="video/mp4">
+    <source src="https://pikaso.cdnpk.net/private/production/4968220120/a253eab5-3b07-4abb-b0ef-9ce249088d78-0.mp4?token=exp=1785110400~hmac=ecff29df739058907da9a53f7e02e2d4e156bd65252352c2c921658f9ed99a99" type="video/mp4">
+  </video>
+  <div class="hero-scrim"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <span class="eyebrow reveal"><span class="dot"></span> <span class="lbl" id="heroLbl">Boutique de design de experiência</span></span>
+    <h1 class="reveal lettering" data-delay="1" id="heroLettering">
+      <span class="phrase on">Toda jornada tem<br><span class="l2 grad-text">um marco zero.</span></span>
+      <span class="phrase">Começa com <br><span class="l2 grad-text">as perguntas certas.</span></span>
+      <span class="phrase">Ideias viram<br><span class="l2 grad-text">protótipos navegáveis.</span></span>
+      <span class="phrase">Protótipos viram<br><span class="l2 grad-text">experiências reais.</span></span>
+    </h1>
+    <p class="sub reveal" data-delay="2">Do posicionamento de marca à IA agêntica, desenhamos ecossistemas de experiência que fazem o seu cliente olhar para trás e perceber um saldo positivo.</p>
+    <div class="hero-cta reveal" data-delay="3">
+      <a href="#contato" class="btn btn-primary">Comece sua jornada →</a>
+      <a href="#fazemos" class="btn btn-ghost">O que fazemos</a>
+    </div>
+  </div>
+  <div class="scroll-cue"><div class="mouse"></div><span>Role para explorar</span></div>
+</header>
+
+<!-- MANIFESTO -->
+<section class="manifesto wrap">
+  <div class="brands reveal">
+    <span class="brand-chip">Disney</span>
+    <span class="brand-chip">Apple</span>
+    <span class="brand-chip">Starbucks</span>
+  </div>
+  <h2 class="reveal" data-delay="1">Você provavelmente teve uma <span class="grad-text">boa experiência</span> com pelo menos uma dessas marcas.</h2>
+  <p class="reveal" data-delay="2">Mesmo com filas na Disney, o carregador vendido à parte na Apple ou o café que não era o melhor — a soma de todas as experiências foi positiva. <strong style="color:var(--txt)">Essa é a nossa especialidade: experiência.</strong></p>
+</section>
+
+<!-- SHOWCASE: scroll-driven laptop + phone -->
+<section class="showcase" id="showcase">
+  <div class="showcase-pin">
+    <div class="showcase-bg"></div>
+    <div class="showcase-copy" id="scopy">
+      <span class="tag grad-text-m">Sistemas que entregamos</span>
+      <h2>Protótipos <span class="grad-text">100% navegáveis</span></h2>
+      <p>Role para ver uma das plataformas que desenvolvemos ganhar vida.</p>
+    </div>
+    <div class="stage">
+      <div class="laptop">
+        <div class="screen" id="lidScreen">
+          <div class="bezel">
+            <div class="cam"></div>
+            <!-- BMP internet banking UI -->
+            <div class="bank">
+              <aside class="side">
+                <div class="b-logo"><i></i> BMP</div>
+                <div class="nav-i act"><b></b> Início</div>
+                <div class="nav-i"><b></b> Extrato</div>
+                <div class="nav-i"><b></b> Transferências</div>
+                <div class="nav-i"><b></b> Investimentos</div>
+                <div class="nav-i"><b></b> Cartões</div>
+                <div class="nav-i"><b></b> Configurações</div>
+              </aside>
+              <div class="main">
+                <div class="top"><h4>Olá, bem-vindo de volta</h4><div class="u"></div></div>
+                <div class="cards">
+                  <div class="kpi hero-c"><span>Saldo disponível</span><b>R$ 148.920,75</b></div>
+                  <div class="kpi"><span>Investimentos</span><b>R$ 92.410</b></div>
+                  <div class="kpi"><span>Cartão de crédito</span><b>R$ 3.184</b></div>
+                </div>
+                <div class="row2">
+                  <div class="chartbox">
+                    <div class="cap"><span>Fluxo dos últimos 6 meses</span><span>+12,4%</span></div>
+                    <svg class="spark" viewBox="0 0 300 52" preserveAspectRatio="none">
+                      <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#8B2FE6" stop-opacity=".45"/><stop offset="1" stop-color="#3A5BFF" stop-opacity="0"/></linearGradient></defs>
+                      <path d="M0,40 C30,36 45,20 75,24 C105,28 120,10 150,14 C180,18 200,30 230,20 C255,12 275,6 300,10 L300,52 L0,52 Z" fill="url(#g1)"/>
+                      <path d="M0,40 C30,36 45,20 75,24 C105,28 120,10 150,14 C180,18 200,30 230,20 C255,12 275,6 300,10" fill="none" stroke="#B14BFF" stroke-width="2"/>
+                    </svg>
+                  </div>
+                  <div class="qa">
+                    <div class="q"><i></i> Transferir Pix</div>
+                    <div class="q"><i></i> Pagar boleto</div>
+                    <div class="q"><i></i> Investir</div>
+                  </div>
+                </div>
+                <div class="tx">
+                  <div class="t"><span>Recebimento — Cliente Alpha</span><span class="amt pos">+ R$ 12.400</span></div>
+                  <div class="t"><span>Pagamento fornecedor</span><span class="amt neg">− R$ 3.280</span></div>
+                  <div class="t"><span>Rendimento CDB</span><span class="amt pos">+ R$ 842</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="base"></div>
+        <!-- phone -->
+        <div class="phone" id="phoneEl">
+          <div class="pscreen">
+            <div class="notch"></div>
+            <div class="mbank">
+              <div class="mtop"><span>BMP</span><span>◔</span></div>
+              <div class="mbal"><span>Saldo em conta</span><b>R$ 148.920,75</b></div>
+              <div class="mgrid">
+                <div class="mi"><i><b></b></i>Pix</div>
+                <div class="mi"><i><b></b></i>Transferir</div>
+                <div class="mi"><i><b></b></i>Pagar</div>
+                <div class="mi"><i><b></b></i>Investir</div>
+              </div>
+              <div class="mcard">
+                <div class="cap">Últimas movimentações</div>
+                <div class="mt"><span>Pix recebido</span><span class="amt pos">+840</span></div>
+                <div class="mt"><span>Assinatura</span><span class="amt neg">−49</span></div>
+                <div class="mt"><span>Rendimento</span><span class="amt pos">+62</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="sect wrap" id="fazemos">
+  <div class="sect-head">
+    <span class="tag grad-text-m reveal">O que fazemos</span>
+    <h2 class="reveal" data-delay="1">Um ecossistema de <span class="grad-text">experiência</span>, ponta a ponta</h2>
+    <p class="reveal" data-delay="2">Do posicionamento de marca às soluções avançadas de Inteligência Artificial, cuidamos de todas as frentes relevantes para o seu público.</p>
+  </div>
+  <div class="grid-svc">
+    <div class="svc reveal"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5z"/></svg></div><h3><small>BRAND EXPERIENCE</small>Marca viva e coerente</h3><p>Um sistema operacional de marca — narrativa, identidade, tom de voz e governança — para ativações consistentes em todos os touchpoints.</p></div>
+    <div class="svc reveal" data-delay="1"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 21h8"/></svg></div><h3><small>USER EXPERIENCE · UX</small>Interfaces sem atrito</h3><p>Jornadas e interfaces guiadas por evidências: pesquisa, prototipação e testes contínuos, com foco em acessibilidade, performance e conversão.</p></div>
+    <div class="svc reveal" data-delay="2"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></div><h3><small>PRODUCT EXPERIENCE · PX</small>Produto por outcomes</h3><p>Discovery contínuo, PLG, experimentação e North Star Metrics para guiar o roadmap do MVP ao scale-up, elevando adoção e retenção.</p></div>
+    <div class="svc reveal" data-delay="3"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></div><h3><small>CUSTOMER EXPERIENCE · CX</small>Jornadas omnicanais</h3><p>CDP, personalização e omnicanalidade fechando o loop de feedback (NPS/CSAT/CES) para reduzir esforço e ampliar o LTV.</p></div>
+    <div class="svc reveal"><div class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg></div><h3><small>PHYGITAL EXPERIENCE</small>Físico + digital fluidos</h3><p>Apps, IoT, RFID/computer vision, QR/kiosks e AR/XR conectando mundos em jornadas “click-to-brick” com dados acionáveis.</p></div>
+    <div class="svc reveal" data-delay="1"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><h3><small>EMPLOYEE EXPERIENCE · EX</small>Colaborador no fluxo</h3><p>Copilotos de IA, automações e digital workplace que aumentam produtividade, pertencimento e retenção de talentos.</p></div>
+    <div class="svc reveal" data-delay="2"><div class="ico"><svg viewBox="0 0 24 24"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/></svg></div><h3><small>DEV EXPERIENCE · DX</small>Platform engineering</h3><p>Design systems, docs-as-code e uma IDP com golden paths e CI/CD, governada por DORA + SPACE + DevEx.</p></div>
+    <div class="svc reveal" data-delay="3"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/></svg></div><h3><small>AI EXPERIENCE</small>IA com governança</h3><p>Do diagnóstico a copilotos e agentes com RAG, guardrails, avaliações e MLOps/LLMOps — prototipados rápido e escalados com segurança.</p></div>
+  </div>
+</section>
+
+<!-- PLATFORMS -->
+<section class="sect wrap" id="plataformas">
+  <div class="sect-head">
+    <span class="tag grad-text-m reveal">Plataformas de IA</span>
+    <h2 class="reveal" data-delay="1">Nossa tecnologia <span class="grad-text">acelera</span> seus projetos</h2>
+    <p class="reveal" data-delay="2">Ferramentas proprietárias usadas em todas as entregas — e disponíveis para seus projetos internos via assinatura, com onboarding rápido e integrações por API.</p>
+  </div>
+  <div class="plat">
+    <div class="plat-card reveal">
+      <span class="pill">Station Zero Compass</span>
+      <h3>Discovery na velocidade da IA</h3>
+      <p>Sintetiza entrevistas e dados, mapeia Jobs To Be Done, agrupa insights, sugere hipóteses e prioriza um backlog orientado a evidências.</p>
+      <div class="feats"><span>Roteiros de pesquisa</span><span>Scoring</span><span>Figma</span><span>Notion</span><span>Jira</span><span>Miro</span></div>
+    </div>
+    <div class="plat-card reveal" data-delay="1">
+      <span class="pill">Station Zero Forge</span>
+      <h3>Agentes de IA em produção</h3>
+      <p>Construtor visual de agentes com integração nativa a ligações, SMS e WhatsApp. TTS/STT, IVR, handoff humano, RAG, guardrails e A/B testing.</p>
+      <div class="feats"><span>Agent Studio</span><span>WhatsApp</span><span>Telefonia</span><span>RAG</span><span>Analytics</span><span>CRM & APIs</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- METHODS -->
+<section class="sect wrap" id="metodologias">
+  <div class="sect-head">
+    <span class="tag grad-text-m reveal">Metodologias</span>
+    <h2 class="reveal" data-delay="1">Agilidade, co-criação e <span class="grad-text">entregas recorrentes</span></h2>
+  </div>
+  <div class="meth">
+    <div class="meth-i reveal"><h4>Design Thinking</h4><p>Inovação focada em pessoas e resolução de problemas baseada em empatia e criatividade.</p></div>
+    <div class="meth-i reveal" data-delay="1"><h4>Lean Inception</h4><p>Sprints rápidos em workshops colaborativos e multidisciplinares para consolidar propostas de valor.</p></div>
+    <div class="meth-i reveal" data-delay="2"><h4>Métodos Ágeis</h4><p>Entregas incrementais e ciclos iterativos para lidar com a imprevisibilidade de qualquer projeto.</p></div>
+    <div class="meth-i reveal" data-delay="3"><h4>Estudo Etnográfico</h4><p>Análise profunda de comportamentos, hábitos e motivações dos usuários no contexto real.</p></div>
+  </div>
+</section>
+
+<!-- CASE -->
+<section class="sect wrap" id="case">
+  <div class="case reveal">
+    <div>
+      <span class="pill">Case · Internet Banking</span>
+      <h3>Uma nova experiência bancária para a BMP</h3>
+      <p>A BMP queria proporcionar uma experiência disruptiva aos clientes: uma plataforma que encanta, é intuitiva e transmite segurança e credibilidade.</p>
+      <p>Entregamos um protótipo 100% navegável com qualidade comparável às empresas mais inovadoras do mercado — permitindo ao time comercial divulgar todas as funcionalidades antes mesmo do desenvolvimento final.</p>
+      <div class="stats">
+        <div><b class="grad-text">100%</b><span>Navegável</span></div>
+        <div><b class="grad-text">+190%</b><span>Crescimento de líderes em CX*</span></div>
+      </div>
+    </div>
+    <div class="visual">
+      <div class="fake">
+        <div class="r g"></div><div class="r"></div><div class="r" style="width:80%"></div>
+        <div class="cc"><div></div><div></div><div></div></div>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:11px;color:var(--txt-dim);margin-top:14px;text-align:center">*Estudo do Boston Consulting Group citado pela Valor Econômico: empresas líderes em CX crescem 190% mais que a média.</p>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="contato">
+  <div class="wrap">
+    <h2 class="reveal">Seu ponto de partida <span class="grad-text">para o sucesso.</span></h2>
+    <p class="reveal" data-delay="1">Vamos desenhar juntos a próxima jornada da sua marca.</p>
+    <a href="mailto:contato@stationzerolab.com" class="btn btn-primary reveal" data-delay="2" style="padding:16px 34px;font-size:16px">Fale com a gente</a>
+    <p class="mail grad-text reveal" data-delay="3" style="margin-top:28px;margin-bottom:0">contato@stationzerolab.com</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap foot-in">
+    <a href="#top" class="logo"><span class="mark"><span></span></span> Station Zero Lab</a>
+    <div class="foot-links">
+      <a href="https://www.linkedin.com/company/station-zero-lab/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://stationzerolab.com/politica-de-privacidade" target="_blank" rel="noopener">Política de privacidade</a>
+      <a href="mailto:contato@stationzerolab.com">Contato</a>
+    </div>
+    <span>© 2026 Station Zero Lab</span>
+  </div>
+</footer>
+
+<script>
+/* NAV scroll state */
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>40),{passive:true});
+
+/* Reveal on scroll */
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.16});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* Hero video + synced lettering */
+const heroVideo=document.getElementById('heroVideo');
+const phrases=document.querySelectorAll('#heroLettering .phrase');
+const heroLbl=document.getElementById('heroLbl');
+const phases=[
+  {start:0.0, i:0, lbl:'Boutique de design de experiência'},
+  {start:3.6, i:1, lbl:'Design Thinking · Discovery'},
+  {start:7.6, i:2, lbl:'UX · UI · Prototipação'},
+  {start:11.6,i:3, lbl:'Do marco zero ao sucesso'}
+];
+const LOOP=15;let curPhase=-1;
+function applyPhase(k){
+  if(k===curPhase)return;curPhase=k;
+  phrases.forEach((p,idx)=>p.classList.toggle('on',idx===phases[k].i));
+  heroLbl.style.opacity=0;
+  setTimeout(()=>{heroLbl.textContent=phases[k].lbl;heroLbl.style.opacity=1;},250);
+}
+if(heroVideo){
+  heroVideo.addEventListener('playing',()=>heroVideo.classList.add('ready'));
+  heroVideo.addEventListener('loadeddata',()=>heroVideo.classList.add('ready'));
+}
+function letteringTick(){
+  let t;
+  if(heroVideo && !heroVideo.paused && heroVideo.readyState>2 && heroVideo.duration){
+    t=heroVideo.currentTime % (heroVideo.duration||LOOP);
+    const dur=heroVideo.duration;
+    // scale phase timings to actual video duration
+    t=t/dur*LOOP;
+  } else {
+    t=(performance.now()/1000)%LOOP;
+  }
+  let k=0;for(let j=0;j<phases.length;j++){if(t>=phases[j].start)k=j;}
+  applyPhase(k);
+  requestAnimationFrame(letteringTick);
+}
+requestAnimationFrame(letteringTick);
+
+/* Scroll-driven laptop opening + phone reveal */
+const showcase=document.getElementById('showcase');
+const lid=document.getElementById('lidScreen');
+const phone=document.getElementById('phoneEl');
+const scopy=document.getElementById('scopy');
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function tick(){
+  const r=showcase.getBoundingClientRect();
+  const total=showcase.offsetHeight-innerHeight;
+  const p=clamp(-r.top/total,0,1); // 0..1 progress through the section
+  // Laptop lid: closed(-90deg, folded down) -> open(0deg). Opens over first 55%.
+  const op=clamp(p/0.55,0,1);
+  const angle=-90+90*op;              // -90 -> 0
+  const scale=0.92+0.08*op;
+  lid.style.transform=`rotateX(${angle}deg) scale(${scale})`;
+  lid.style.filter=`brightness(${0.4+0.6*op})`;
+  // Phone slides in during 55%-90%
+  const pp=clamp((p-0.55)/0.3,0,1);
+  phone.style.transform=`translate3d(${40*(1-pp)}px,${60*(1-pp)}px,0) rotate(${8*(1-pp)}deg)`;
+  phone.style.opacity=pp;
+  // copy fades as laptop opens
+  scopy.style.opacity=clamp(1-p*1.4,0,1);
+  requestAnimationFrame(tick);
+}
+lid.style.transformOrigin='bottom center';
+requestAnimationFrame(tick);
+
+/* Hero animated gradient mesh (Apple-style flowing blobs) */
+const cv=document.getElementById('heroCanvas'),cx=cv.getContext('2d');
+let W,H,DPR;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=cv.width=innerWidth*DPR;H=cv.height=cv.offsetHeight*DPR;}
+resize();addEventListener('resize',resize);
+const blobs=[
+  {x:.30,y:.40,r:.42,c:[139,47,230]},
+  {x:.72,y:.62,r:.40,c:[58,91,255]},
+  {x:.55,y:.30,r:.34,c:[200,30,138]},
+  {x:.20,y:.75,r:.30,c:[47,168,255]}
+];
+let t=0;
+function draw(){
+  t+=.0032;
+  cx.clearRect(0,0,W,H);
+  cx.fillStyle='#07070f';cx.fillRect(0,0,W,H);
+  cx.globalCompositeOperation='lighter';
+  blobs.forEach((b,i)=>{
+    const x=(b.x+Math.sin(t+i*1.7)*.06)*W;
+    const y=(b.y+Math.cos(t*1.1+i*2.1)*.06)*H;
+    const rad=b.r*Math.max(W,H)*(0.9+0.1*Math.sin(t*1.3+i));
+    const g=cx.createRadialGradient(x,y,0,x,y,rad);
+    g.addColorStop(0,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},.55)`);
+    g.addColorStop(1,`rgba(${b.c[0]},${b.c[1]},${b.c[2]},0)`);
+    cx.fillStyle=g;cx.beginPath();cx.arc(x,y,rad,0,7);cx.fill();
+  });
+  cx.globalCompositeOperation='source-over';
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
