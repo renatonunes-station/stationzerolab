@@ -264,11 +264,10 @@ footer{border-top:1px solid var(--card-brd);padding:44px 0;color:var(--txt-dim);
 <!-- HERO -->
 <header class="hero" id="top">
   <canvas id="heroCanvas"></canvas>
-  <!-- 1ª source = link temporário do Magnific (expira ~2 dias, só para preview imediato).
-       Baixe o MP4 no card do chat, salve como assets/hero-journey.mp4 e ele passa a ser usado de forma permanente. -->
+  <!-- Vídeo do hero: coloque o arquivo em assets/hero-journey.mp4 (baixe no chat do Cowork).
+       Sem o arquivo, o hero usa automaticamente o fundo em gradiente animado como fallback. -->
   <video id="heroVideo" autoplay muted loop playsinline preload="auto">
     <source src="assets/hero-journey.mp4" type="video/mp4">
-    <source src="https://pikaso.cdnpk.net/private/production/4968220120/a253eab5-3b07-4abb-b0ef-9ce249088d78-0.mp4?token=exp=1785110400~hmac=ecff29df739058907da9a53f7e02e2d4e156bd65252352c2c921658f9ed99a99" type="video/mp4">
   </video>
   <div class="hero-scrim"></div>
   <div class="hero-glow"></div>
