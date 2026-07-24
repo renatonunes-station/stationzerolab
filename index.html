@@ -108,7 +108,9 @@ section{position:relative}
 .manifesto .brands{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:44px}
 .brand-chip{padding:10px 22px;border-radius:100px;border:1px solid var(--card-brd);background:var(--card);font-size:14px;font-weight:600;color:var(--txt-dim);backdrop-filter:blur(10px)}
 .manifesto h2{font-size:clamp(28px,4.6vw,50px);font-weight:800;max-width:920px;margin:0 auto 28px}
-.manifesto p{font-size:clamp(16px,2.1vw,20px);color:var(--txt-dim);max-width:660px;margin:0 auto;line-height:1.65}
+.manifesto p{font-size:clamp(16px,2.1vw,20px);color:var(--txt-dim);max-width:680px;margin:0 auto;line-height:1.65}
+.manifesto p + p{margin-top:22px}
+.manifesto .lead{margin-bottom:26px}
 
 /* ============ SHOWCASE (scroll-driven laptop + phone) ============ */
 .showcase{position:relative;height:320vh}
@@ -292,13 +294,16 @@ footer{border-top:1px solid var(--card-brd);padding:44px 0;color:var(--txt-dim);
 
 <!-- MANIFESTO -->
 <section class="manifesto wrap">
-  <div class="brands reveal">
+  <span class="tag grad-text-m reveal">O que é experiência</span>
+  <h2 class="reveal" data-delay="1">Experiência é a soma de <span class="grad-text">cada momento</span> entre a sua marca e as pessoas.</h2>
+  <p class="lead reveal" data-delay="2">Pense nas marcas de que você mais gosta — provavelmente teve uma boa experiência com pelo menos uma delas:</p>
+  <div class="brands reveal" data-delay="3">
     <span class="brand-chip">Disney</span>
     <span class="brand-chip">Apple</span>
     <span class="brand-chip">Starbucks</span>
   </div>
-  <h2 class="reveal" data-delay="1">Você provavelmente teve uma <span class="grad-text">boa experiência</span> com pelo menos uma dessas marcas.</h2>
-  <p class="reveal" data-delay="2">Mesmo com filas na Disney, o carregador vendido à parte na Apple ou o café que não era o melhor — a soma de todas as experiências foi positiva. <strong style="color:var(--txt)">Essa é a nossa especialidade: experiência.</strong></p>
+  <p class="reveal" data-delay="4">Mesmo com filas na Disney, o carregador vendido à parte na Apple ou um café que não era o melhor na Starbucks, a lembrança que fica é positiva. A soma de todas as interações deixa um saldo bom — e isso é resultado de design, não de sorte.</p>
+  <p class="reveal" data-delay="5">É exatamente isso que fazemos: mapeamos a jornada completa do seu cliente e desenhamos cada ponto de contato — da marca ao produto, do digital ao físico, do atendimento à inteligência artificial — para que, no fim, a percepção seja positiva. <strong style="color:var(--txt)">Essa é a nossa especialidade: experiência.</strong></p>
 </section>
 
 <!-- SHOWCASE: scroll-driven laptop + phone -->
